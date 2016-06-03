@@ -1,11 +1,14 @@
 import cv2
 import numpy as np
 import math
+import copy
 
 IMAGE_WIDTH = 36
 IMAGE_HIGHT = 36
 SIZE = 9
 N_MIN_ACTIVE_PIXELS = 10
+global EX_CHESSBOARD
+EX_CHESSBOARD = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
 # sort the corners to remap the image
 
@@ -33,29 +36,50 @@ def getOuterPoints(rcCorners):
 # blue->-1
 
 
-def checkColor(CHESSBOARD, blur):
-	r = 3 * IMAGE_WIDTH / 2
-	for i in range(3):
-		for j in range(3):
-			p = blur[(2 * i + 1) * r][(2 * j + 1) * r]
-			if (p[0] < 100):
-				CHESSBOARD[i][j] = 1
-			elif (p[2] < 100):
-				CHESSBOARD[i][j] = -1
+def checkColor(blur):
+    r = 3 * IMAGE_WIDTH / 2
+    chessboard = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+    for i in range(3):
+        for j in range(3):
+            p = blur[(2 * i + 1) * r][(2 * j + 1) * r]
+            if (p[0] < 100):
+                chessboard[i][j] = 1
+            elif (p[2] < 100):
+                chessboard[i][j] = -1
+            else:
+                chessboard[i][j] = 0
+
+    return chessboard
+
 
 # classify chessmen
 
 
-def checkChessmen(frame):
+def checkChessmen(frame, EX_CHESSBOARD):
     blur = cv2.GaussianBlur(frame, (5, 5), 0)
-    
-    CHESSBOARD = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    checkColor(CHESSBOARD, blur)
-    print CHESSBOARD
+
+    # CHESSBOARD = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+    CHESSBOARD = checkColor(blur)
+
+    temp_sum = 0
+    for i in range(len(EX_CHESSBOARD)):
+        for j in range(len(EX_CHESSBOARD)):
+            temp_sum += (CHESSBOARD[i][j] - EX_CHESSBOARD[i][j])
+    # print temp_sum
+    # print EX_CHESSBOARD
+    # print CHESSBOARD
+    # print
+    if (abs(temp_sum) == 1):
+        for i in range(len(EX_CHESSBOARD)):
+            for j in range(len(EX_CHESSBOARD)):
+                EX_CHESSBOARD[i][j] = CHESSBOARD[i][j]
+
+        print EX_CHESSBOARD
+        print
 
 
 cap = cv2.VideoCapture(0)
-big_rectangle = np.array([[[0, 0]], [[0, 48]], [[48, 48]], [[48, 0]]])
+big_rectangle = np.array([[[0, 0]], [[0, 1]], [[1, 1]], [[1, 0]]])
 while (True):
     ret, frame = cap.read()
 
@@ -71,7 +95,7 @@ while (True):
     img, contours0, hierarchy = cv2.findContours(
         thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     # size of the image
-    h, w = frame.shape[:2]
+    h, w = frame.shape[: 2]
     # copy the frame to  shwo the possible candidate
     candidates = frame.copy()
     # biggest rectagle
@@ -115,7 +139,7 @@ while (True):
         frame, pers, (SIZE * IMAGE_HIGHT, SIZE * IMAGE_WIDTH))
     # warp_gray = cv2.cvtColor(warp, cv2.COLOR_BGR2GRAY)
     # check color
-    checkChessmen(warp)
+    checkChessmen(warp, EX_CHESSBOARD)
     # show
     cv2.imshow('test', warp)
     if cv2.waitKey(1) & 0xFF == ord('q'):
