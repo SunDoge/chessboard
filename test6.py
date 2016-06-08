@@ -10,5 +10,8 @@ while (True):
     cv2.imshow('warp', warp)
     chessboard=np.array(chessboard)
     print chessboard
+    print
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
+cv2.destroyAllWindows()
