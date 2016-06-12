@@ -57,7 +57,7 @@ def checkColor(blur):
 
 def checkChessmen(frame, EX_CHESSBOARD):
     blur = cv2.GaussianBlur(frame, (5, 5), 0)
-
+    cv2.imshow('blur',blur)
     # CHESSBOARD = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     CHESSBOARD = checkColor(blur)
 
@@ -84,7 +84,8 @@ while (True):
     ret, frame = cap.read()
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+    cv2.imshow('gray',gray)
+    cv2.imshow('frame',frame)
     # adaptive threshold
     thresh = cv2.adaptiveThreshold(gray, 255, 1, 1, 11, 15)
     # show
@@ -124,7 +125,7 @@ while (True):
             1]), (big_rectangle[((i + 1) % 4)][0][0], big_rectangle[((i + 1) %
                                                                      4)][0][1]), (255, 0, 0), 2)
 
-    cv2.imshow('candidates', candidates)
+    # cv2.imshow('candidates', candidates)
 
     # point to remap
     points1 = np.array([np.array([0.0, 0.0], np.float32) + np.array([324, 0], np.float32), np.array([0.0, 0.0], np.float32),
@@ -141,7 +142,7 @@ while (True):
     # check color
     checkChessmen(warp, EX_CHESSBOARD)
     # show
-    cv2.imshow('test', warp)
+    # cv2.imshow('test', warp)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
