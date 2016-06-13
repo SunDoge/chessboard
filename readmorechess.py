@@ -51,16 +51,17 @@ class ReadChess(object):
         chessboard = self.__CHESSBOARD
         for i in range(1, 8):
             for j in range(1, 8):
-                p = blur[i * r][j * r]
-                # print p
+                p = blur[i * r + 5][j * r + 5]
+
                 if (chessboard[i][j] < 2):
-                    if (p[0] < 200):
+                    # print p
+                    if (p[0] < 100):
                         chessboard[i][j] = 1
-                    elif (p[2] < 200):
+                    elif (p[2] < 100):
                         chessboard[i][j] = -1
-                    elif(p[0] > 200 and p[1] > 200 and p[2] > 200):
+                    else:
                         chessboard[i][j] = 0
-                cv2.circle(blur, (i * r, j * r), 5, (0, 0, 255), -1)
+                # cv2.circle(blur, (i * r, j * r), 5, (0, 0, 255), -1)
         return chessboard
 
     # classify chessmen
